@@ -31,11 +31,9 @@ To contribute or modify the project, start by forking the repository:
 To install the weather app, follow these steps:
 
 1. Clone the forked repository to your local machine:
-   ```bash
-   git clone https://github.com/AdrianRRojo/weather-app-rust.git
-   ```
-
-
+```bash
+    git clone https://github.com/AdrianRRojo/weather-app-rust.git
+```
 2. Navigate to the cloned directory:
 ```bash
     cd weather-app-in-rust
