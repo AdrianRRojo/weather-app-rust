@@ -6,6 +6,7 @@
     use tokio;
     use dotenv::dotenv;
     use std::io;
+    use serde::{Deserialize, Serialize};
     
 //   fn main() {
 //     println!("enter your city");
@@ -25,8 +26,47 @@
 //     // let resp: serde_json::Value = get(url)?.json()?;
 //     // println!("{:?}", resq);
 
+#[derive(Serialize, Deserialize, Debug)]
+struct Location {
+    name: String,
+    region: String,
+    country: String,
+    //temp_f: String,
+    // feelslike_c: u32,
+    // feelslike_f: u32,
+    // cloud: u32,
+    // wind_mph: u32,
+    // humidity: i32,
+    // wind_dir: String,
+}
+#[derive(Serialize, Deserialize, Debug)]
+struct Current {
+    temp_f: f32,
+}
+#[derive(Serialize, Deserialize, Debug)]
+struct WeatherData {
+    location: Location,
+    current: Current,
+}
+
+// API JSON response
+// {
+//     "location":{"name":"Miami","region":"Florida","country":"United States of America","lat":25.77,"lon":-80.19,"tz_id":"America/New_York","localtime_epoch":1703446600,"localtime":"2023-12-24 14:36"},
+//
+//     "current":{"last_updated_epoch":1703446200,"last_updated":"2023-12-24 14:30","temp_c":25.0,"temp_f":77.0,"is_day":1,
+//         "condition":{"text":"Overcast","icon":"//cdn.weatherapi.com/weather/64x64/day/122.png","code":1009},
+//         "wind_mph":17.4,"wind_kph":28.1,"wind_degree":90,"wind_dir":"E","pressure_mb":1018.0,"pressure_in":30.07,"precip_mm":0.22,
+//         "precip_in":0.01,"humidity":62,"cloud":100,"feelslike_c":26.5,"feelslike_f":79.7,"vis_km":16.0,"vis_miles":9.0,"uv":5.0,"gust_mph":23.9,"gust_kph":38.5
+//     }
+// }
+
+
+
+// Tells the compiler to run this async function at runtime, in this case main.
 #[tokio::main]
     async fn main() -> Result<(), reqwest::Error> {
+
+
         // load .env variables
         dotenv().ok();
         // set our api key to a usuable variable
@@ -53,8 +93,17 @@
 
         // api response
         let body = res.text().await?;
+
+        let weather_data: WeatherData = serde_json::from_str(&body).expect("error");
+
         println!("Body:\n{}", body);
 
+        println!("{:#?}", weather_data);
+        println!("{}", weather_data.current.temp_f);
+        //println!("Country: {}", weather_data.location.country);
+        //println!("F: {}",weather_data.location.feelslike_f);
+        //println!("humidity: {}", weather_data.location.humidity);
+        //println!("wind_mph: {}", weather_data.location.wind_mph);
         // this is successful return the result
         Ok(())
     }
