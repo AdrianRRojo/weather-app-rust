@@ -1,4 +1,4 @@
-# Weather App in Rust
+# Weather App in Rust --- WIP
 
 ## Introduction
 This weather app is designed as a learning project to further my skills in the Rust programming language. It's a simple, yet functional app that provides current weather information.
