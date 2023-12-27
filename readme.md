@@ -36,7 +36,7 @@ To install the weather app, follow these steps:
 ```
 2. Navigate to the cloned directory:
 ```bash
-    cd weather-app-in-rust
+    cd weather-app-rust
 ```
 3. Build the project using Cargo (the Rust package manager):
 

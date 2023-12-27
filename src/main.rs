@@ -7,6 +7,7 @@
     use dotenv::dotenv;
     use std::io;
     use serde::{Deserialize, Serialize};
+    use druid::{Data, widget::{Label, Button, Flex}, Env, Widget, WindowDesc, AppLauncher};
     
 //   fn main() {
 //     println!("enter your city");
@@ -25,6 +26,11 @@
 
 //     // let resp: serde_json::Value = get(url)?.json()?;
 //     // println!("{:?}", resq);
+#[derive(Clone,Data)]
+struct WeatherUi {
+    data: i32
+}
+
 
 #[derive(Serialize, Deserialize, Debug)]
 struct Location {
@@ -60,12 +66,25 @@ struct WeatherData {
 //     }
 // }
 
+fn ui() -> impl Widget<WeatherUi> {
+    let label = Label::new(|data: &WeatherUi, _: &Env| format!("Counter: {}", data.data));
+    let increment = Button::new("+")
+        .on_click(|_ctx, data: &mut WeatherUi, _env| data.data += 1);
+    let decrement = Button::new("-")
+        .on_click(|_ctx, data: &mut WeatherUi, _env| data.data -= 1);
 
+    Flex::column().with_child(label).with_child(Flex::row().with_child(increment).with_child(decrement))
+}
 
 // Tells the compiler to run this async function at runtime, in this case main.
 #[tokio::main]
     async fn main() -> Result<(), reqwest::Error> {
 
+        let main_window = WindowDesc::new(ui())
+        .title("test Window");
+        AppLauncher::with_window(main_window)
+        .log_to_console()
+        .launch(WeatherUi { data: 0 }).unwrap();
 
         // load .env variables
         dotenv().ok();
