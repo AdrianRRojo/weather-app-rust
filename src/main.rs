@@ -1,9 +1,9 @@
 // Include dependencies
-// use reqwest;
+use reqwest;
 use tokio;
 use dotenv::dotenv;
 //use std::io;
-// use serde::{Deserialize, Serialize};
+ use serde::{Deserialize, Serialize};
 
 //Druid is how we handle the GUI
 use druid::widget::prelude::*;
@@ -11,7 +11,7 @@ use druid::widget::{Flex, Label, TextBox};
 use druid::{AppLauncher, Data, Lens, UnitPoint, WidgetExt, WindowDesc};
 
 const VERTICAL_WIDGET_SPACING: f64 = 20.0;
-const TEXT_BOX_WIDTH: f64 = 200.0;
+const TEXT_BOX_WIDTH: f64 = 300.0;
 
 #[derive(Clone,Data,Lens)]
 struct WeatherUi {
@@ -21,32 +21,63 @@ struct WeatherUi {
 }
 
 
-// #[derive(Serialize, Deserialize, Debug)]
-// struct Location {
-//     // API - WeatherData.Location
-//     name: String,
-//     region: String,
-//     country: String,
-// }
-// #[derive(Serialize, Deserialize, Debug)]
-// struct Current {
-//     // API - WeatherData.Current
-//     temp_f: f32,
-// }
-// #[derive(Serialize, Deserialize, Debug)]
-// struct WeatherData {
-//     location: Location,
-//     current: Current,
-// }
+#[derive(Serialize, Deserialize, Debug)]
+struct Location {
+    // API - WeatherData.Location
+    name: String,
+    region: String,
+    country: String,
+}
+#[derive(Serialize, Deserialize, Debug)]
+struct Current {
+    // API - WeatherData.Current
+    temp_f: f32,
+}
+#[derive(Serialize, Deserialize, Debug)]
+struct WeatherData {
+    location: Location,
+    current: Current,
+}
 
 // API JSON response
 // {
-//     "location":{"name":"Miami","region":"Florida","country":"United States of America","lat":25.77,"lon":-80.19,"tz_id":"America/New_York","localtime_epoch":1703446600,"localtime":"2023-12-24 14:36"},
-//
-//     "current":{"last_updated_epoch":1703446200,"last_updated":"2023-12-24 14:30","temp_c":25.0,"temp_f":77.0,"is_day":1,
-//         "condition":{"text":"Overcast","icon":"//cdn.weatherapi.com/weather/64x64/day/122.png","code":1009},
-//         "wind_mph":17.4,"wind_kph":28.1,"wind_degree":90,"wind_dir":"E","pressure_mb":1018.0,"pressure_in":30.07,"precip_mm":0.22,
-//         "precip_in":0.01,"humidity":62,"cloud":100,"feelslike_c":26.5,"feelslike_f":79.7,"vis_km":16.0,"vis_miles":9.0,"uv":5.0,"gust_mph":23.9,"gust_kph":38.5
+//     "location":{
+            // "name":"Miami",
+            // "region":"Florida",
+            // "country":"United States of America",
+            // "lat":25.77,
+            // "lon":-80.19,
+            // "tz_id":"America/New_York",
+            // "localtime_epoch":1703446600,
+            // "localtime":"2023-12-24 14:36"},
+
+//     "current":{
+//         "last_updated_epoch":1703446200,
+//         "last_updated":"2023-12-24 14:30",
+//         "temp_c":25.0,
+//         "temp_f":77.0,
+//         "is_day":1,
+//         "condition":{"text":"Overcast",
+//         "icon":"//cdn.weatherapi.com/weather/64x64/day/122.png",
+//         "code":1009},
+
+//          "wind_mph":17.4,
+//         "wind_kph":28.1,
+//         "wind_degree":90,
+//         "wind_dir":"E",
+//         "pressure_mb":1018.0,
+//         "pressure_in":30.07,
+//         "precip_mm":0.22,
+//         "precip_in":0.01,
+//         "humidity":62,
+//         "cloud":100,
+//         "feelslike_c":26.5,
+//         "feelslike_f":79.7,
+//         "vis_km":16.0,
+//         "vis_miles":9.0,
+//         "uv":5.0,
+//         "gust_mph":23.9,
+//         "gust_kph":38.5
 //     }
 // }
 
@@ -67,24 +98,25 @@ struct WeatherUi {
 // }
 
 // Tells the compiler to run this async function at runtime, in this case main.
-#[tokio::main]
-    async fn main() -> Result<(), reqwest::Error> {
+
+    fn main() {
 
 
 
         // load .env variables
-        dotenv().ok();
-        // set our api key to a usuable variable
-        let api_key = std::env::var("API_KEY").expect("API key is not set");
-        print!("{}",api_key);
+        // dotenv().ok();
+        // // set our api key to a usuable variable
+        // let api_key = std::env::var("API_KEY").expect("API key is not set");
+        // print!("{}",api_key);
+
         // Describe the window we are creating
         let main_window = WindowDesc::new(build_root_widget())
-            .title("Weather app in rust")
-            .window_size((400.0,400.0));
+            .title("Weather app in Rust")
+            .window_size((400.0,750.0));
 
         // initial app state
         let initial_state: WeatherUi = WeatherUi{
-            city: "test".into(),
+            city: "".into(),
         };
 
         // Launch the app
@@ -118,7 +150,7 @@ struct WeatherUi {
     //     println!("{}", weather_data.current.temp_f);
 
         // this is successful return the result
-        Ok(())
+        // Ok(())
     }
 
   
@@ -126,16 +158,18 @@ struct WeatherUi {
         // a label that will determine its text based on the current app data.
         let label = Label::new(|data: &WeatherUi, _env: &Env| {
             if data.city.is_empty() {
-                "Hello anybody!?".to_string()
+                "Please enter a city".to_string()
             } else {
-                format!("Hello {}!", data.city)
+                // format!("{}!", data.city)
+                // let user_city = data.city;
+                format!("{}",return_api_data(data.city.clone()))
             }
         })
         .with_text_size(32.0);
-        // a textbox that modifies `name`.
+        
         let textbox = TextBox::new()
-            .with_placeholder("Who are we greeting?")
-            .with_text_size(18.0)
+            .with_placeholder("Where should we go?")
+            .with_text_size(20.0)
             .fix_width(TEXT_BOX_WIDTH)
             .lens(WeatherUi::city);
 
@@ -147,5 +181,42 @@ struct WeatherUi {
             .align_vertical(UnitPoint::CENTER)
     }    
 
+    fn return_api_data(city: String) -> String{
+        return city
+    }
+    #[tokio::main]
+    async fn fetch_api_data() -> Result<String, reqwest::Error> {
+        //Testing func connection
+        //let x = String::from("connected");
+        //return x
+        dotenv().ok();
+        // set our api key to a usuable variable
+        let api_key = std::env::var("API_KEY").expect("API key is not set");
+        print!("{}",api_key);
+        let city = "Miami";
+        let url = format!("http://api.weatherapi.com/v1/current.json?key={}&q={}&aqi=no", api_key, city);
+        
+        // // Send a GET request to the url
+        let res = reqwest::get(url).await?;
+    
+        // get the status code, should be 200
+        println!("Status: {}", res.status());
+        //     // println!("Headers:\n{:#?}", res.headers());
+    
+        //     api response
+             let body = res.text().await?;
+    
+             let weather_data: WeatherData = serde_json::from_str(&body).expect("error");
+    
+        //     println!("Body:\n{}", body);
+    
+        //     println!("{:#?}", weather_data);
+        //     println!("{}", weather_data.current.temp_f);
+        let region = weather_data.location.region;
+            // this is successful return the result
+           Ok(region)
+            
+            
+    }
 
 
