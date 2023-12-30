@@ -1,16 +1,19 @@
-# Weather App in Rust --- WIP
+# Weather App in Rust
 
 ## Introduction
 This weather app is designed as a learning project to further my skills in the Rust programming language. It's a simple, yet functional app that provides current weather information.
 
 ## Purpose
-The purpose of this project is to progress my learning in the Rust programming language, understand API interaction, and handle JSON data in a type-safe manner.
+The purpose of this project is to progress my learning in the Rust programming language, understand API interaction, and handle JSON data in a type-safe manner, as well as creating a GUI using Druid.
 
-## MVP
-![Weather App MVP](mvp.png "Weather App MVP Screenshot")
+## Minimum Viable Product (MVP)
+- [x] **City-Based Weather Retrieval**: Users can input a city name to receive the current day's weather information.
+- [x] **Graphical User Interface**: The app GUI will be created using Druid.
+- [x] **API Integration**: Establishes a connection with a weather API to fetch and display various data points related to the weather conditions.
 
-## Bonus
-![Weather App Bonus](bonus.png "Weather App bonus Screenshot")
+## Bonus Features
+- **Dynamic Weather Backgrounds**: The app will dynamically change its background to match the current weather conditions, such as displaying raindrops for rainy weather.
+- **Extended Forecasts**: Offers a 7-day weather forecast, allowing users to plan their week around the upcoming weather conditions.
 
 ## Features
 - Fetch and display current weather data
