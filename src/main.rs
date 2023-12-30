@@ -7,11 +7,12 @@ use dotenv::dotenv;
 
 //Druid is how we handle the GUI
 use druid::widget::prelude::*;
-use druid::widget::{Flex, Label, TextBox};
+use druid::widget::{Flex, Label, TextBox, Button};
 use druid::{AppLauncher, Data, Lens, UnitPoint, WidgetExt, WindowDesc};
 
 const VERTICAL_WIDGET_SPACING: f64 = 20.0;
 const TEXT_BOX_WIDTH: f64 = 300.0;
+const BUTTON_BOX_WIDTH: f64 = 150.0;
 
 #[derive(Clone,Data,Lens)]
 struct WeatherUi {
@@ -97,8 +98,6 @@ struct WeatherData {
 //         .lens(WeatherUi::name);
 // }
 
-// Tells the compiler to run this async function at runtime, in this case main.
-
     fn main() {
 
 
@@ -162,7 +161,8 @@ struct WeatherData {
             } else {
                 // format!("{}!", data.city)
                 // let user_city = data.city;
-                format!("{}",return_api_data(data.city.clone()))
+                // format!("{:#?}",fetch_api_data(data.city.clone()))
+                data.city.clone()
             }
         })
         .with_text_size(32.0);
@@ -173,27 +173,41 @@ struct WeatherData {
             .fix_width(TEXT_BOX_WIDTH)
             .lens(WeatherUi::city);
 
+        let button = Button::new("Search")
+            .on_click(|_ctx, data: &mut WeatherUi, _env| {
+                match fetch_api_data(data.city.clone()){
+                    Ok(fetched) => {
+                        data.city = fetched;
+                    }
+                    Err(e) =>{
+                        eprintln!("Error fetching data: {:?}", e);
+                    }
+                }
+            })
+            .fix_width(BUTTON_BOX_WIDTH);
+        
     // arrange the two widgets vertically, with some padding
         Flex::column()
+            // .with_child(button)
             .with_child(label)
+            .with_child(button)
             .with_spacer(VERTICAL_WIDGET_SPACING)
             .with_child(textbox)
             .align_vertical(UnitPoint::CENTER)
     }    
 
-    fn return_api_data(city: String) -> String{
-        return city
-    }
     #[tokio::main]
-    async fn fetch_api_data() -> Result<String, reqwest::Error> {
+    async fn fetch_api_data(city: String) -> Result<String, reqwest::Error> {
         //Testing func connection
         //let x = String::from("connected");
         //return x
+
         dotenv().ok();
         // set our api key to a usuable variable
         let api_key = std::env::var("API_KEY").expect("API key is not set");
-        print!("{}",api_key);
-        let city = "Miami";
+        // print!("{}",api_key);
+
+        // let city = "Miami";
         let url = format!("http://api.weatherapi.com/v1/current.json?key={}&q={}&aqi=no", api_key, city);
         
         // // Send a GET request to the url
@@ -214,9 +228,8 @@ struct WeatherData {
         //     println!("{}", weather_data.current.temp_f);
         let region = weather_data.location.region;
             // this is successful return the result
-           Ok(region)
-            
-            
+           Ok(region)           
     }
+
 
 
