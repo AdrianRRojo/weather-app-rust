@@ -19,20 +19,23 @@ struct WeatherUi {
     // GUI
     // data: i32,
     city: String,
+    temp_f: String,
+    temp_c: String,
 }
 
 
 #[derive(Serialize, Deserialize, Debug)]
 struct Location {
-    // API - WeatherData.Location
+    // API - WeatherData.location
     name: String,
     region: String,
     country: String,
 }
 #[derive(Serialize, Deserialize, Debug)]
 struct Current {
-    // API - WeatherData.Current
+    // API - WeatherData.current
     temp_f: f32,
+    temp_c: f32,
 }
 #[derive(Serialize, Deserialize, Debug)]
 struct WeatherData {
@@ -62,7 +65,7 @@ struct WeatherData {
 //         "icon":"//cdn.weatherapi.com/weather/64x64/day/122.png",
 //         "code":1009},
 
-//          "wind_mph":17.4,
+//         "wind_mph":17.4,
 //         "wind_kph":28.1,
 //         "wind_degree":90,
 //         "wind_dir":"E",
@@ -81,23 +84,6 @@ struct WeatherData {
 //         "gust_kph":38.5
 //     }
 // }
-
-// fn ui() -> impl Widget<WeatherUi> {
-//     let label = Label::new(|data: &WeatherUi, _: &Env| format!("Counter: {}", data.data));
-//     let increment = Button::new("+")
-//         .on_click(|_ctx, data: &mut WeatherUi, _env| data.data += 1);
-//     let decrement = Button::new("-")
-//         .on_click(|_ctx, data: &mut WeatherUi, _env| data.data -= 1);
-
-//     Flex::column().with_child(label).with_child(Flex::row().with_child(increment).with_child(decrement))
-
-//     let txt_Box = TextBox::new()
-//         .with_placeholder("Who are we greeting?")
-//         .with_text_size(18.0)
-//         // .fix_width(TEXT_BOX_WIDTH)
-//         .lens(WeatherUi::name);
-// }
-
     fn main() {
 
 
@@ -116,6 +102,8 @@ struct WeatherData {
         // initial app state
         let initial_state: WeatherUi = WeatherUi{
             city: "".into(),
+            temp_f: "".into(),
+            temp_c: "".into(),
         };
 
         // Launch the app
@@ -124,32 +112,6 @@ struct WeatherData {
             .launch(initial_state)
             .expect("Oh no! Failed to launch");
 
-
-
-
-
-    // // The API endpoint
-    //     let url = format!("http://api.weatherapi.com/v1/current.json?key={}&q={}&aqi=no", api_key, city);
-        
-    // // Send a GET request to the url
-    //    let res = reqwest::get(url).await?;
-
-    //     // get the status code, should be 200
-    //     println!("Status: {}", res.status());
-    //     // println!("Headers:\n{:#?}", res.headers());
-
-    //     // api response
-    //     let body = res.text().await?;
-
-    //     let weather_data: WeatherData = serde_json::from_str(&body).expect("error");
-
-    //     println!("Body:\n{}", body);
-
-    //     println!("{:#?}", weather_data);
-    //     println!("{}", weather_data.current.temp_f);
-
-        // this is successful return the result
-        // Ok(())
     }
 
   
@@ -159,10 +121,20 @@ struct WeatherData {
             if data.city.is_empty() {
                 "Please enter a city".to_string()
             } else {
-                // format!("{}!", data.city)
-                // let user_city = data.city;
                 // format!("{:#?}",fetch_api_data(data.city.clone()))
-                data.city.clone()
+                // data.city.clone();
+                data.temp_f.clone()
+            }
+        })
+        .with_text_size(32.0);
+
+        let temp_c_label = Label::new(|data: &WeatherUi, _env: &Env| {
+            if data.city.is_empty() {
+                " ".to_string()
+            } else {
+                // format!("{:#?}",fetch_api_data(data.city.clone()))
+                // data.city.clone();
+                data.temp_c.clone()
             }
         })
         .with_text_size(32.0);
@@ -176,8 +148,10 @@ struct WeatherData {
         let button = Button::new("Search")
             .on_click(|_ctx, data: &mut WeatherUi, _env| {
                 match fetch_api_data(data.city.clone()){
-                    Ok(fetched) => {
-                        data.city = fetched;
+                    Ok((temp_c, temp_f)) => {
+                        // data.city = fetched.to_string();
+                        data.temp_f = temp_f.to_string();
+                        data.temp_c = temp_c.to_string();
                     }
                     Err(e) =>{
                         eprintln!("Error fetching data: {:?}", e);
@@ -189,46 +163,43 @@ struct WeatherData {
     // arrange the two widgets vertically, with some padding
         Flex::column()
             // .with_child(button)
-            .with_child(label)
+            .with_child(textbox)
+            .with_spacer(VERTICAL_WIDGET_SPACING)
             .with_child(button)
             .with_spacer(VERTICAL_WIDGET_SPACING)
-            .with_child(textbox)
+            .with_child(label)
+            .with_child(temp_c_label)
             .align_vertical(UnitPoint::CENTER)
     }    
 
     #[tokio::main]
-    async fn fetch_api_data(city: String) -> Result<String, reqwest::Error> {
-        //Testing func connection
-        //let x = String::from("connected");
-        //return x
-
+    async fn fetch_api_data(city: String) -> Result<(f32,f32), reqwest::Error> {
         dotenv().ok();
         // set our api key to a usuable variable
         let api_key = std::env::var("API_KEY").expect("API key is not set");
-        // print!("{}",api_key);
 
-        // let city = "Miami";
         let url = format!("http://api.weatherapi.com/v1/current.json?key={}&q={}&aqi=no", api_key, city);
         
-        // // Send a GET request to the url
+        // Send a GET request to the url
         let res = reqwest::get(url).await?;
     
         // get the status code, should be 200
         println!("Status: {}", res.status());
-        //     // println!("Headers:\n{:#?}", res.headers());
     
         //     api response
              let body = res.text().await?;
     
-             let weather_data: WeatherData = serde_json::from_str(&body).expect("error");
+             let weather_data: WeatherData = serde_json::from_str(&body).expect("Error parsing JSON");
     
         //     println!("Body:\n{}", body);
     
         //     println!("{:#?}", weather_data);
         //     println!("{}", weather_data.current.temp_f);
-        let region = weather_data.location.region;
+        let temp_f = weather_data.current.temp_f;
+        let temp_c = weather_data.current.temp_c;
+        //let region = weath_data.location.region;
             // this is successful return the result
-           Ok(region)           
+            Ok((temp_f, temp_c))
     }
 
 
