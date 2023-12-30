@@ -7,8 +7,8 @@ use dotenv::dotenv;
 
 //Druid is how we handle the GUI
 use druid::widget::prelude::*;
-use druid::widget::{Flex, Label, TextBox, Button};
-use druid::{AppLauncher, Data, Lens, UnitPoint, WidgetExt, WindowDesc};
+use druid::widget::{Flex, Label, TextBox, Button,Align};
+use druid::{AppLauncher, Data, Lens, WidgetExt, WindowDesc};
 
 const VERTICAL_WIDGET_SPACING: f64 = 20.0;
 const TEXT_BOX_WIDTH: f64 = 300.0;
@@ -93,7 +93,9 @@ struct WeatherData {
         // Define the window we are creating
         let main_window = WindowDesc::new(build_root_widget())
             .title("Weather app in Rust")
-            .window_size((400.0,750.0));
+            .window_size((400.0,750.0))
+            .resizable(true);
+
 
         // initial app state
         let initial_state: WeatherUi = WeatherUi{
@@ -177,18 +179,20 @@ struct WeatherData {
             .fix_width(BUTTON_BOX_WIDTH);
 
         // GUI design styling
-        Flex::column()
-            // .with_child(button)
-            .with_child(textbox)
-            .with_spacer(VERTICAL_WIDGET_SPACING)
-            .with_child(button)
-            .with_spacer(VERTICAL_WIDGET_SPACING)
-            .with_child(temp_f_label)
-            // .with_child(temp_c_label)
-            .with_child(country_label)
-            // .with_child(region_label)
-            .with_child(wind_mph_label)
-            .align_vertical(UnitPoint::CENTER)
+    // GUI design styling
+    let column = Flex::column()
+        .with_child(textbox)
+        .with_spacer(VERTICAL_WIDGET_SPACING)
+        .with_child(button)
+        .with_spacer(VERTICAL_WIDGET_SPACING)
+        .with_child(country_label)
+        .with_spacer(VERTICAL_WIDGET_SPACING)
+        .with_child(temp_f_label)
+        .with_spacer(VERTICAL_WIDGET_SPACING)
+        .with_child(wind_mph_label);
+
+    // Center the column in the parent container
+    Align::centered(column)
     }    
 
     // API call function
