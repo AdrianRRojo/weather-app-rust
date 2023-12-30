@@ -90,21 +90,14 @@ struct WeatherData {
 // }
     fn main() {
 
-
-
-        // load .env variables
-        // dotenv().ok();
-        // // set our api key to a usuable variable
-        // let api_key = std::env::var("API_KEY").expect("API key is not set");
-        // print!("{}",api_key);
-
-        // Describe the window we are creating
+        // Define the window we are creating
         let main_window = WindowDesc::new(build_root_widget())
             .title("Weather app in Rust")
             .window_size((400.0,750.0));
 
         // initial app state
         let initial_state: WeatherUi = WeatherUi{
+            //List of variables that will be filled with api data after submission
             city: "".into(),
             temp_f: "".into(),
             temp_c: "".into(),
@@ -123,59 +116,41 @@ struct WeatherData {
 
   
     fn build_root_widget() -> impl Widget<WeatherUi> {
-        // a label that will determine its text based on the current app data.
+
+        // Labels will be used to fill in data
         let temp_f_label = Label::new(|data: &WeatherUi, _env: &Env| {
             if data.city.is_empty() {
                 "Please enter a city".to_string()
             } else {
                 // format!("{:#?}",fetch_api_data(data.city.clone()))
                 // data.city.clone();
-                data.temp_f.clone()
+                format!("{}°F / {}°C",data.temp_f.clone(), data.temp_c.clone())
             }
         })
-        .with_text_size(32.0);
+        .with_text_size(24.0);
 
-        let temp_c_label = Label::new(|data: &WeatherUi, _env: &Env| {
-            if data.city.is_empty() {
-                " ".to_string()
-            } else {
-                // format!("{:#?}",fetch_api_data(data.city.clone()))
-                // data.city.clone();
-                data.temp_c.clone()
-            }
-        })
-        .with_text_size(32.0);
-        let region_label = Label::new(|data: &WeatherUi, _env: &Env| {
-            if data.city.is_empty() {
-                " ".to_string()
-            } else {
-                // format!("{:#?}",fetch_api_data(data.city.clone()))
-                // data.city.clone();
-                data.region.clone()
-            }
-        })
-        .with_text_size(32.0);
         let country_label = Label::new(|data: &WeatherUi, _env: &Env| {
             if data.city.is_empty() {
                 " ".to_string()
             } else {
                 // format!("{:#?}",fetch_api_data(data.city.clone()))
                 // data.city.clone();
-                data.country.clone()
+                format!("{},{},{}" ,data.city, data.region.clone(), data.country.clone())
             }
         })
-        .with_text_size(32.0);
+        .with_text_size(16.0);
+
         let wind_mph_label = Label::new(|data: &WeatherUi, _env: &Env| {
             if data.city.is_empty() {
                 " ".to_string()
             } else {
                 // format!("{:#?}",fetch_api_data(data.city.clone()))
                 // data.city.clone();
-                data.wind_mph.clone()
+                format!("{} {}",data.wind_mph.clone(), "MPH")
             }
         })
         
-        .with_text_size(32.0);
+        .with_text_size(24.0);
         
         let textbox = TextBox::new()
             .with_placeholder("Where should we go?")
@@ -187,7 +162,7 @@ struct WeatherData {
             .on_click(|_ctx, data: &mut WeatherUi, _env| {
                 match fetch_api_data(data.city.clone()){
                     Ok((temp_c, temp_f, region, country, wind_mph)) => {
-                        // data.city = fetched.to_string();
+                        //convert f32 values to strings to use as text, also this is where the data from the api is returned to, and later used in the labels.
                         data.temp_f = temp_f.to_string();
                         data.temp_c = temp_c.to_string();
                         data.region = region;
@@ -200,8 +175,8 @@ struct WeatherData {
                 }
             })
             .fix_width(BUTTON_BOX_WIDTH);
-        
-    // arrange the two widgets vertically, with some padding
+
+        // GUI design styling
         Flex::column()
             // .with_child(button)
             .with_child(textbox)
@@ -209,13 +184,14 @@ struct WeatherData {
             .with_child(button)
             .with_spacer(VERTICAL_WIDGET_SPACING)
             .with_child(temp_f_label)
-            .with_child(temp_c_label)
+            // .with_child(temp_c_label)
             .with_child(country_label)
-            .with_child(region_label)
+            // .with_child(region_label)
             .with_child(wind_mph_label)
             .align_vertical(UnitPoint::CENTER)
     }    
 
+    // API call function
     #[tokio::main]
     async fn fetch_api_data(city: String) -> Result<(f32,f32,String,String,f32), reqwest::Error> {
         dotenv().ok();
@@ -238,14 +214,16 @@ struct WeatherData {
         //     println!("Body:\n{}", body);
     
         //     println!("{:#?}", weather_data);
-        //     println!("{}", weather_data.current.temp_f);
+
+        //list of variables returned from the API, used to fill in the labels.
         let temp_f = weather_data.current.temp_f;
         let temp_c = weather_data.current.temp_c;
         let wind_mph = weather_data.current.wind_mph;
         let region = weather_data.location.region;
         let country = weather_data.location.country;
-            // this is successful return the result
-            Ok((temp_f, temp_c, region, country, wind_mph))
+
+        // this is successful return the result
+        Ok((temp_f, temp_c, region, country, wind_mph))
     }
 
 
